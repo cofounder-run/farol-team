@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farol Labs — Канбан</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
+.subtitle { text-align: center; color: #8b949e; margin-bottom: 12px; font-size: 0.95em; }
+
+/* Alert */
+.alert { text-align: center; background: #da3633; color: #fff; padding: 10px 16px; border-radius: 8px; margin: 0 auto 16px; max-width: 700px; font-weight: 600; font-size: 0.95em; }
+
+/* Goals */
+.goals { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+.goal { background: #161b22; border-radius: 8px; padding: 10px 16px; text-align: center; }
+.goal-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+.goal-value { font-size: 1.2em; font-weight: 700; color: #f0f6fc; }
+.goal-sub { font-size: 0.75em; color: #8b949e; }
+
+/* Filters */
+.filters { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+.filter-btn { background: #21262d; color: #8b949e; border: 1px solid #30363d; padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s; user-select: none; }
+.filter-btn:hover { border-color: #58a6ff; color: #c9d1d9; }
+.filter-btn.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+.filter-btn[data-filter="all"].active { background: #8b949e33; color: #f0f6fc; border-color: #8b949e; }
+.filter-btn[data-filter="leo"].active { background: #1f6feb33; color: #58a6ff; border-color: #58a6ff; }
+.filter-btn[data-filter="mayak"].active { background: #3fb95033; color: #3fb950; border-color: #3fb950; }
+.filter-btn[data-filter="ori"].active { background: #d2992233; color: #d29922; border-color: #d29922; }
+
+/* Board */
+.board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 20px; align-items: flex-start; }
+.column { flex: 1; min-width: 260px; max-width: 340px; background: #161b22; border-radius: 10px; padding: 14px; }
+.column-title { font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; justify-content: space-between; align-items: center; }
+.column-count { font-size: 0.75em; font-weight: 400; opacity: 0.6; }
+.col-blocked .column-title { color: #f85149; border-color: #f85149; }
+.col-progress .column-title { color: #58a6ff; border-color: #58a6ff; }
+.col-next .column-title { color: #d29922; border-color: #d29922; }
+.col-backlog .column-title { color: #8b949e; border-color: #30363d; }
+.col-done .column-title { color: #3fb950; border-color: #3fb950; }
+
+/* Cards */
+.card { background: #21262d; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid #30363d; transition: opacity 0.25s, transform 0.25s; }
+.card:last-child { margin-bottom: 0; }
+.card.hidden { display: none; }
+.card-title { font-weight: 600; font-size: 0.9em; color: #f0f6fc; margin-bottom: 4px; }
+.card-desc { font-size: 0.8em; color: #8b949e; line-height: 1.4; }
+.tag { display: inline-block; font-size: 0.7em; padding: 2px 7px; border-radius: 10px; font-weight: 600; margin-right: 4px; margin-top: 6px; }
+.tag-leo { background: #1f6feb33; color: #58a6ff; }
+.tag-mayak { background: #3fb95033; color: #3fb950; }
+.tag-ori { background: #d2992233; color: #d29922; }
+.tag-all { background: #8b949e33; color: #8b949e; }
+.card.blocked { border-left-color: #f85149; }
+.card.progress { border-left-color: #58a6ff; }
+.card.ready { border-left-color: #3fb950; }
+.constraint { background: #f8514922; border: 1px solid #f8514966; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; transition: opacity 0.25s; }
+.constraint.hidden { display: none; }
+.constraint .card-title { color: #f85149; }
+
+/* Empty column */
+.empty-msg { text-align: center; color: #484f58; font-size: 0.8em; padding: 20px 10px; display: none; }
+.column.all-hidden .empty-msg { display: block; }
+
+/* Footer */
+.footer { text-align: center; color: #484f58; font-size: 0.75em; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>🦀 Farol Labs — Канбан</h1>
+<p class="subtitle">9 марта 2026 · 75 дней до дедлайна</p>
+
+<div class="alert">🔴 BILLING НЕ ПОДКЛЮЧЁН — 17 дней простоя · Revenue = $0 · ~$200/день потерянного MRR</div>
+
+<div class="goals">
+  <div class="goal"><div class="goal-label">Цель</div><div class="goal-value">$200K</div><div class="goal-sub">к 23 мая 2026</div></div>
+  <div class="goal"><div class="goal-label">Revenue</div><div class="goal-value" style="color:#f85149">$0</div><div class="goal-sub">нет billing</div></div>
+  <div class="goal"><div class="goal-label">Осталось</div><div class="goal-value">75 дн</div><div class="goal-sub">10.5 недель</div></div>
+  <div class="goal"><div class="goal-label">Exit цель</div><div class="goal-value">≥$100M</div><div class="goal-sub">Farol Labs</div></div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">Все</button>
+  <button class="filter-btn" data-filter="leo">🔵 Леонид</button>
+  <button class="filter-btn" data-filter="mayak">🟢 Маяк</button>
+  <button class="filter-btn" data-filter="ori">🟡 Ori</button>
+</div>
+
+<div class="board">
+
+  <!-- BLOCKED -->
+  <div class="column col-blocked">
+    <div class="column-title"><span>🔴 Блокировано <span class="column-count"></span></span></div>
+    <div class="constraint card-item" data-owners="leo">
+      <div class="card-title">⛔ Billing (Stripe)</div>
+      <div class="card-desc">Нет юрлица → нет Stripe → revenue = $0. Блокирует ВСЁ.<br>Workaround: Lemonsqueezy / Paddle</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="constraint card-item" data-owners="ori,mayak">
+      <div class="card-title">⚠️ Онбординг Ori</div>
+      <div class="card-desc">Клиент не видит разницу с ChatGPT в первые 30 мин.</div>
+      <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+    </div>
+    <div class="empty-msg">Нет задач</div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="column col-progress">
+    <div class="column-title"><span>🔵 В работе <span class="column-count"></span></span></div>
+    <div class="card progress card-item" data-owners="leo">
+      <div class="card-title">Self-service deploy + Billing</div>
+      <div class="card-desc">Автодеплой ✅, теперь billing + MiniMax интеграция</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card progress card-item" data-owners="mayak">
+      <div class="card-title">Sales + онбординг клиентов</div>
+      <div class="card-desc">5 лидов: Naora, BUNT, SHAMAN (Zoom), Leads4You, Deepn</div>
+      <span class="tag tag-mayak">Маяк</span>
+    </div>
+    <div class="card progress card-item" data-owners="ori">
+      <div class="card-title">TG продвижение + Product Hunt</div>
+      <div class="card-desc">Research каналов, креативов. Prep — НЕ запускать до billing.</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="empty-msg">Нет задач</div>
+  </div>
+
+  <!-- NEXT -->
+  <div class="column col-next">
+    <div class="column-title"><span>🟡 Следующее <span class="column-count"></span></span></div>
+    <div class="card card-item" data-owners="leo">
+      <div class="card-title">Переезд → getori.app</div>
+      <div class="card-desc">Новый домен, лендинг, редиректы</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card card-item" data-owners="leo">
+      <div class="card-title">Юрлицо (Stripe Atlas)</div>
+      <div class="card-desc">~$500, 1-2 дня → Stripe + инвестиции</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card card-item" data-owners="leo">
+      <div class="card-title">Pricing page на лендинге</div>
+      <div class="card-desc">$20/мес Sebastian, $200/мес Ori</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card card-item" data-owners="mayak">
+      <div class="card-title">Demo видео/GIF</div>
+      <div class="card-desc">Лендинг не конвертит без визуала</div>
+      <span class="tag tag-mayak">Маяк</span>
+    </div>
+    <div class="card card-item" data-owners="mayak">
+      <div class="card-title">Утвердить pricing</div>
+      <div class="card-desc">$20/$200 — нужно подтверждение</div>
+      <span class="tag tag-mayak">Маяк</span>
+    </div>
+    <div class="card card-item" data-owners="ori">
+      <div class="card-title">Product Hunt launch</div>
+      <div class="card-desc">Burst трафика + social proof</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card card-item" data-owners="ori">
+      <div class="card-title">System prompt доработка</div>
+      <div class="card-desc">После первого платящего клиента</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="empty-msg">Нет задач</div>
+  </div>
+
+  <!-- SECURITY + BACKLOG -->
+  <div class="column col-backlog">
+    <div class="column-title"><span>🔒 Security + Backlog <span class="column-count"></span></span></div>
+    <div class="card card-item" data-owners="leo">
+      <div class="card-title">P0: Auth на всех инстансах</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card card-item" data-owners="leo">
+      <div class="card-title">P0: bwrap sandbox</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card card-item" data-owners="leo,ori">
+      <div class="card-title">P1: fs-guard hooks</div>
+      <span class="tag tag-leo">Леонид</span> <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card card-item" data-owners="ori">
+      <div class="card-title">P1: DLP на выходе</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card card-item" data-owners="ori">
+      <div class="card-title">Pipeline 20 лидов</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card card-item" data-owners="ori">
+      <div class="card-title">Twitter-стратегия</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card card-item" data-owners="ori">
+      <div class="card-title">Trademark "ORI"</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="empty-msg">Нет задач</div>
+  </div>
+
+  <!-- DONE -->
+  <div class="column col-done">
+    <div class="column-title"><span>✅ Готово <span class="column-count"></span></span></div>
+    <div class="card ready card-item" data-owners="leo">
+      <div class="card-title">Self-service deploy</div>
+      <div class="card-desc">✅ Снято 5 марта</div>
+      <span class="tag tag-leo">Леонид</span>
+    </div>
+    <div class="card ready card-item" data-owners="ori">
+      <div class="card-title">Лендинги</div>
+      <div class="card-desc">cofounder.run + getsebastian.app</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card ready card-item" data-owners="ori,mayak">
+      <div class="card-title">Sebastian Onboarding v2</div>
+      <div class="card-desc">BOOTSTRAP.md + PCM + TOC</div>
+      <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+    </div>
+    <div class="card ready card-item" data-owners="mayak">
+      <div class="card-title">Демо Naora</div>
+      <span class="tag tag-mayak">Маяк</span>
+    </div>
+    <div class="card ready card-item" data-owners="all">
+      <div class="card-title">SOUL.md + Манифест</div>
+      <span class="tag tag-all">Все</span>
+    </div>
+    <div class="card ready card-item" data-owners="ori">
+      <div class="card-title">Unit Economics</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card ready card-item" data-owners="ori">
+      <div class="card-title">Twitter API</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="card ready card-item" data-owners="ori">
+      <div class="card-title">Cron: Board + AI News</div>
+      <span class="tag tag-ori">Ori</span>
+    </div>
+    <div class="empty-msg">Нет задач</div>
+  </div>
+
+</div>
+
+<div class="footer">Farol Labs · Sebastian ($49) · Ori ($200) · Updated 9 Mar 2026</div>
+
+<script>
+const buttons = document.querySelectorAll('.filter-btn');
+const cards = document.querySelectorAll('.card-item');
+const columns = document.querySelectorAll('.column');
+
+function updateCounts() {
+  columns.forEach(col => {
+    const visible = col.querySelectorAll('.card-item:not(.hidden)').length;
+    const counter = col.querySelector('.column-count');
+    if (counter) counter.textContent = `(${visible})`;
+    col.classList.toggle('all-hidden', visible === 0);
+  });
+}
+
+function applyFilter(filter) {
+  buttons.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+  cards.forEach(card => {
+    const owners = card.dataset.owners;
+    if (filter === 'all') {
+      card.classList.remove('hidden');
+    } else {
+      const match = owners.includes(filter) || owners === 'all';
+      card.classList.toggle('hidden', !match);
+    }
+  });
+  updateCounts();
+  // Save to URL
+  const url = new URL(window.location);
+  if (filter === 'all') url.searchParams.delete('who');
+  else url.searchParams.set('who', filter);
+  history.replaceState(null, '', url);
+}
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+// Restore from URL
+const params = new URLSearchParams(window.location.search);
+const who = params.get('who');
+if (who && ['leo', 'mayak', 'ori'].includes(who)) {
+  applyFilter(who);
+} else {
+  updateCounts();
+}
+</script>
+
+</body>
+</html>
