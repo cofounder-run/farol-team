@@ -24,6 +24,7 @@
   --color-maybe: oklch(66% 0.196 258);
   --color-next: oklch(74% 0.184 70);
   --color-progress: oklch(66% 0.208 146);
+  --color-review: oklch(66% 0.258 308);
   --color-done: oklch(66% 0.008 258);
   --color-blocked: oklch(66% 0.204 40);
 
@@ -121,6 +122,7 @@ body { font-family: var(--font); background: var(--canvas); color: var(--ink); m
 .col[data-col="maybe"] { --card-color: oklch(66% 0.196 258); }
 .col[data-col="next"] { --card-color: var(--color-next); }
 .col[data-col="progress"] { --card-color: var(--color-progress); }
+.col[data-col="review"] { --card-color: var(--color-review); }
 .col[data-col="done"] { --card-color: var(--color-notnow); }
 
 /* Column header — pill */
@@ -245,6 +247,60 @@ body { font-family: var(--font); background: var(--canvas); color: var(--ink); m
   padding: 8px 16px; background: var(--canvas);
   border-top: 1px solid var(--ink-lighter); font-size: 0.7em; color: var(--ink-medium);
 }
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--canvas); border-radius: 16px; width: 520px; max-width: 92vw;
+  max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity:0; transform: scale(0.96) translateY(8px); } to { opacity:1; transform: none; } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 0;
+}
+.modal-tag {
+  font-size: 0.65em; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 3px 10px; border-radius: 4px;
+  background: var(--ink-lighter); color: var(--ink-dark);
+}
+.modal-close {
+  background: none; border: none; font-size: 1.4em; cursor: pointer;
+  color: var(--ink-medium); padding: 4px;
+}
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 16px 24px 24px; }
+.modal-title {
+  font-size: 1.4em; font-weight: 900; margin-bottom: 4px;
+  color: var(--ink); line-height: 1.2;
+}
+.modal-meta { font-size: 0.78em; color: var(--ink-medium); margin-bottom: 16px; }
+.modal-field { margin-bottom: 14px; }
+.modal-field label {
+  display: block; font-size: 0.7em; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--ink-dark); margin-bottom: 4px;
+}
+.modal-field textarea {
+  width: 100%; min-height: 80px; padding: 10px 12px;
+  border: 1.5px solid var(--ink-lighter); border-radius: 8px;
+  font-family: var(--font); font-size: 0.88em; color: var(--ink);
+  background: var(--canvas); resize: vertical; outline: none;
+  line-height: 1.5;
+}
+.modal-field textarea:focus { border-color: oklch(66% 0.196 258); }
+.modal-save {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 20px; background: var(--ink); color: var(--canvas);
+  border: none; border-radius: 8px; font-size: 0.85em; font-weight: 700;
+  font-family: var(--font); cursor: pointer;
+}
+.modal-save:hover { opacity: 0.85; }
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -442,6 +498,38 @@ body { font-family: var(--font); background: var(--canvas); color: var(--ink); m
     <div class="empty">Nothing here</div>
   </div>
 
+  <!-- HUMAN REVIEW -->
+  <div class="col" data-col="review">
+    <div class="col-header"><span>Human Review</span><span class="col-count">0</span></div>
+    <div class="card-list">
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="features-page">
+        <div class="card-tag">Marketing</div>
+        <div class="card-body"><div class="card-title">Sebastian features page</div><div class="card-desc">getsebastian.app/features.html — needs review</div></div>
+        <div class="card-people"><span class="person">Ori</span></div>
+        <div class="blocked-stamp">Blocked</div>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="farol-landing">
+        <div class="card-tag">Marketing</div>
+        <div class="card-body"><div class="card-title">Farol Lab landing</div><div class="card-desc">Building in public + Follow on X — needs review</div></div>
+        <div class="card-people"><span class="person">Ori</span></div>
+        <div class="blocked-stamp">Blocked</div>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="skillmart-page">
+        <div class="card-tag">Product</div>
+        <div class="card-body"><div class="card-title">Skillmart / Hire page</div><div class="card-desc">cofounder.run/skillmart + /hire — needs review</div></div>
+        <div class="card-people"><span class="person">Ori</span></div>
+        <div class="blocked-stamp">Blocked</div>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="agent-research">
+        <div class="card-tag">Research</div>
+        <div class="card-body"><div class="card-title">AI marketplaces research</div><div class="card-desc">15+ platforms analyzed — needs review</div></div>
+        <div class="card-people"><span class="person">Ori</span></div>
+        <div class="blocked-stamp">Blocked</div>
+      </div>
+    </div>
+    <div class="empty">Nothing here</div>
+  </div>
+
   <!-- DONE -->
   <div class="col" data-col="done">
     <div class="col-header"><span>Done</span><span class="col-count">0</span></div>
@@ -500,8 +588,31 @@ body { font-family: var(--font); background: var(--canvas); color: var(--ink); m
 
 </div>
 
+<!-- Card Modal -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-tag" id="m-tag"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title" id="m-title"></div>
+      <div class="modal-meta" id="m-meta"></div>
+      <div class="modal-field">
+        <label>Description</label>
+        <textarea id="m-desc" placeholder="Add details, notes, links..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Notes</label>
+        <textarea id="m-notes" placeholder="Comments, decisions, updates..."></textarea>
+      </div>
+      <button class="modal-save" onclick="saveModal()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
-<div class="footer-bar">Drag cards between columns · Double-click to toggle blocked · Mar 9, 2026</div>
+<div class="footer-bar">Click card to edit · Drag between columns · Right-click to toggle blocked · Mar 9, 2026</div>
 
 <script>
 /* Theme */
@@ -543,15 +654,65 @@ function showToast(m) {
   clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-/* Dblclick blocked toggle */
-document.addEventListener('dblclick', e => {
+/* Dblclick blocked toggle (shift+dblclick or right-click to toggle blocked) */
+document.addEventListener('contextmenu', e => {
   const c = e.target.closest('.card-item'); if (!c) return;
+  e.preventDefault();
   c.classList.toggle('is-blocked');
   showToast(c.classList.contains('is-blocked') ? '🔴 Blocked' : '✅ Unblocked');
   saveState();
 });
 
-const CL = { notnow:'Not Now', maybe:'Maybe', next:'Up Next', progress:'In Progress', done:'Done' };
+const CL = { notnow:'Not Now', maybe:'Maybe', next:'Up Next', progress:'In Progress', review:'Human Review', done:'Done' };
+
+/* Card click → modal */
+document.addEventListener('click', e => {
+  const c = e.target.closest('.card-item');
+  if (!c || e.target.closest('.modal-overlay')) return;
+  openModal(c);
+});
+
+let currentCard = null;
+function openModal(card) {
+  currentCard = card;
+  const id = card.dataset.id;
+  const tag = card.querySelector('.card-tag')?.textContent || '';
+  const title = card.querySelector('.card-title')?.textContent || '';
+  const desc = card.querySelector('.card-desc')?.textContent || '';
+  const people = card.querySelector('.card-people')?.textContent?.trim() || '';
+  const col = card.closest('.col')?.dataset.col || '';
+
+  document.getElementById('m-tag').textContent = tag;
+  document.getElementById('m-title').textContent = title;
+  document.getElementById('m-meta').textContent = `${CL[col] || col} · ${people} · #${id}`;
+
+  // Load saved details
+  const saved = JSON.parse(localStorage.getItem('farol-card-details') || '{}');
+  document.getElementById('m-desc').value = saved[id]?.desc || desc;
+  document.getElementById('m-notes').value = saved[id]?.notes || '';
+
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  currentCard = null;
+}
+function saveModal() {
+  if (!currentCard) return;
+  const id = currentCard.dataset.id;
+  const saved = JSON.parse(localStorage.getItem('farol-card-details') || '{}');
+  saved[id] = {
+    desc: document.getElementById('m-desc').value,
+    notes: document.getElementById('m-notes').value
+  };
+  localStorage.setItem('farol-card-details', JSON.stringify(saved));
+  // Update card desc
+  const descEl = currentCard.querySelector('.card-desc');
+  if (descEl) descEl.textContent = document.getElementById('m-desc').value;
+  showToast('💾 Saved');
+  closeModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 /* Drag & Drop */
 let dCard = null;
@@ -623,10 +784,10 @@ function saveState(){
   const s={columns:{},blocked:[]};
   document.querySelectorAll('.col').forEach(col=>{s.columns[col.dataset.col]=[...col.querySelectorAll('.card-item')].map(c=>c.dataset.id);});
   document.querySelectorAll('.card-item.is-blocked').forEach(c=>s.blocked.push(c.dataset.id));
-  localStorage.setItem('farol-kanban-v5',JSON.stringify(s));
+  localStorage.setItem('farol-kanban-v6',JSON.stringify(s));
 }
 function loadState(){
-  const r=localStorage.getItem('farol-kanban-v5'); if(!r) return;
+  const r=localStorage.getItem('farol-kanban-v6'); if(!r) return;
   try{
     const s=JSON.parse(r); const all={};
     document.querySelectorAll('.card-item').forEach(c=>{all[c.dataset.id]=c;});
