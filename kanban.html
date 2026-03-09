@@ -10,17 +10,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
 .subtitle { text-align: center; color: #8b949e; margin-bottom: 12px; font-size: 0.95em; }
 
-/* Alert */
 .alert { text-align: center; background: #da3633; color: #fff; padding: 10px 16px; border-radius: 8px; margin: 0 auto 16px; max-width: 700px; font-weight: 600; font-size: 0.95em; }
 
-/* Goals */
 .goals { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
 .goal { background: #161b22; border-radius: 8px; padding: 10px 16px; text-align: center; }
 .goal-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
 .goal-value { font-size: 1.2em; font-weight: 700; color: #f0f6fc; }
 .goal-sub { font-size: 0.75em; color: #8b949e; }
 
-/* Filters */
 .filters { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
 .filter-btn { background: #21262d; color: #8b949e; border: 1px solid #30363d; padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s; user-select: none; }
 .filter-btn:hover { border-color: #58a6ff; color: #c9d1d9; }
@@ -30,9 +27,9 @@ h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
 .filter-btn[data-filter="mayak"].active { background: #3fb95033; color: #3fb950; border-color: #3fb950; }
 .filter-btn[data-filter="ori"].active { background: #d2992233; color: #d29922; border-color: #d29922; }
 
-/* Board */
 .board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 20px; align-items: flex-start; }
-.column { flex: 1; min-width: 260px; max-width: 340px; background: #161b22; border-radius: 10px; padding: 14px; }
+.column { flex: 1; min-width: 260px; max-width: 340px; background: #161b22; border-radius: 10px; padding: 14px; transition: background 0.2s; min-height: 120px; }
+.column.drag-over { background: #1c2333; outline: 2px dashed #58a6ff; outline-offset: -2px; }
 .column-title { font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; justify-content: space-between; align-items: center; }
 .column-count { font-size: 0.75em; font-weight: 400; opacity: 0.6; }
 .col-blocked .column-title { color: #f85149; border-color: #f85149; }
@@ -41,13 +38,15 @@ h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
 .col-backlog .column-title { color: #8b949e; border-color: #30363d; }
 .col-done .column-title { color: #3fb950; border-color: #3fb950; }
 
-/* Cards */
-.card { background: #21262d; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid #30363d; transition: opacity 0.25s, transform 0.25s; }
-.card:last-child { margin-bottom: 0; }
+.card-list { min-height: 40px; }
+
+.card { background: #21262d; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid #30363d; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s; cursor: grab; user-select: none; }
+.card:active { cursor: grabbing; }
+.card.dragging { opacity: 0.4; transform: scale(0.96); }
 .card.hidden { display: none; }
-.card-title { font-weight: 600; font-size: 0.9em; color: #f0f6fc; margin-bottom: 4px; }
-.card-desc { font-size: 0.8em; color: #8b949e; line-height: 1.4; }
-.tag { display: inline-block; font-size: 0.7em; padding: 2px 7px; border-radius: 10px; font-weight: 600; margin-right: 4px; margin-top: 6px; }
+.card-title { font-weight: 600; font-size: 0.9em; color: #f0f6fc; margin-bottom: 4px; pointer-events: none; }
+.card-desc { font-size: 0.8em; color: #8b949e; line-height: 1.4; pointer-events: none; }
+.tag { display: inline-block; font-size: 0.7em; padding: 2px 7px; border-radius: 10px; font-weight: 600; margin-right: 4px; margin-top: 6px; pointer-events: none; }
 .tag-leo { background: #1f6feb33; color: #58a6ff; }
 .tag-mayak { background: #3fb95033; color: #3fb950; }
 .tag-ori { background: #d2992233; color: #d29922; }
@@ -55,15 +54,23 @@ h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
 .card.blocked { border-left-color: #f85149; }
 .card.progress { border-left-color: #58a6ff; }
 .card.ready { border-left-color: #3fb950; }
-.constraint { background: #f8514922; border: 1px solid #f8514966; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; transition: opacity 0.25s; }
-.constraint.hidden { display: none; }
-.constraint .card-title { color: #f85149; }
 
-/* Empty column */
+.constraint { background: #f8514922; border: 1px solid #f8514966; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; cursor: grab; user-select: none; transition: opacity 0.2s; }
+.constraint:active { cursor: grabbing; }
+.constraint.dragging { opacity: 0.4; }
+.constraint.hidden { display: none; }
+.constraint .card-title { color: #f85149; pointer-events: none; }
+.constraint .card-desc { pointer-events: none; }
+.constraint .tag { pointer-events: none; }
+
+.drop-indicator { height: 3px; background: #58a6ff; border-radius: 2px; margin: 4px 0; transition: opacity 0.15s; }
+
 .empty-msg { text-align: center; color: #484f58; font-size: 0.8em; padding: 20px 10px; display: none; }
 .column.all-hidden .empty-msg { display: block; }
 
-/* Footer */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1f6feb; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.85em; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+.toast.show { opacity: 1; }
+
 .footer { text-align: center; color: #484f58; font-size: 0.75em; margin-top: 10px; }
 </style>
 </head>
@@ -81,7 +88,6 @@ h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
   <div class="goal"><div class="goal-label">Exit цель</div><div class="goal-value">≥$100M</div><div class="goal-sub">Farol Labs</div></div>
 </div>
 
-<!-- Filters -->
 <div class="filters">
   <button class="filter-btn active" data-filter="all">Все</button>
   <button class="filter-btn" data-filter="leo">🔵 Леонид</button>
@@ -92,169 +98,197 @@ h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
 <div class="board">
 
   <!-- BLOCKED -->
-  <div class="column col-blocked">
+  <div class="column col-blocked" data-col="blocked">
     <div class="column-title"><span>🔴 Блокировано <span class="column-count"></span></span></div>
-    <div class="constraint card-item" data-owners="leo">
-      <div class="card-title">⛔ Billing (Stripe)</div>
-      <div class="card-desc">Нет юрлица → нет Stripe → revenue = $0. Блокирует ВСЁ.<br>Workaround: Lemonsqueezy / Paddle</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="constraint card-item" data-owners="ori,mayak">
-      <div class="card-title">⚠️ Онбординг Ori</div>
-      <div class="card-desc">Клиент не видит разницу с ChatGPT в первые 30 мин.</div>
-      <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+    <div class="card-list">
+      <div class="constraint card-item" draggable="true" data-owners="leo" data-id="billing">
+        <div class="card-title">⛔ Billing (Stripe)</div>
+        <div class="card-desc">Нет юрлица → нет Stripe → revenue = $0.<br>Workaround: Lemonsqueezy / Paddle</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="constraint card-item" draggable="true" data-owners="ori,mayak" data-id="onboarding">
+        <div class="card-title">⚠️ Онбординг Ori</div>
+        <div class="card-desc">Клиент не видит разницу с ChatGPT в первые 30 мин.</div>
+        <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+      </div>
     </div>
     <div class="empty-msg">Нет задач</div>
   </div>
 
   <!-- IN PROGRESS -->
-  <div class="column col-progress">
+  <div class="column col-progress" data-col="progress">
     <div class="column-title"><span>🔵 В работе <span class="column-count"></span></span></div>
-    <div class="card progress card-item" data-owners="leo">
-      <div class="card-title">Self-service deploy + Billing</div>
-      <div class="card-desc">Автодеплой ✅, теперь billing + MiniMax интеграция</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card progress card-item" data-owners="mayak">
-      <div class="card-title">Sales + онбординг клиентов</div>
-      <div class="card-desc">5 лидов: Naora, BUNT, SHAMAN (Zoom), Leads4You, Deepn</div>
-      <span class="tag tag-mayak">Маяк</span>
-    </div>
-    <div class="card progress card-item" data-owners="ori">
-      <div class="card-title">TG продвижение + Product Hunt</div>
-      <div class="card-desc">Research каналов, креативов. Prep — НЕ запускать до billing.</div>
-      <span class="tag tag-ori">Ori</span>
+    <div class="card-list">
+      <div class="card progress card-item" draggable="true" data-owners="leo" data-id="self-service">
+        <div class="card-title">Self-service deploy + Billing</div>
+        <div class="card-desc">Автодеплой ✅, теперь billing + MiniMax</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card progress card-item" draggable="true" data-owners="mayak" data-id="sales">
+        <div class="card-title">Sales + онбординг клиентов</div>
+        <div class="card-desc">5 лидов: Naora, BUNT, SHAMAN, Leads4You, Deepn</div>
+        <span class="tag tag-mayak">Маяк</span>
+      </div>
+      <div class="card progress card-item" draggable="true" data-owners="ori" data-id="tg-ph">
+        <div class="card-title">TG продвижение + Product Hunt</div>
+        <div class="card-desc">Research. Prep — НЕ запускать до billing.</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
     </div>
     <div class="empty-msg">Нет задач</div>
   </div>
 
   <!-- NEXT -->
-  <div class="column col-next">
+  <div class="column col-next" data-col="next">
     <div class="column-title"><span>🟡 Следующее <span class="column-count"></span></span></div>
-    <div class="card card-item" data-owners="leo">
-      <div class="card-title">Переезд → getori.app</div>
-      <div class="card-desc">Новый домен, лендинг, редиректы</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card card-item" data-owners="leo">
-      <div class="card-title">Юрлицо (Stripe Atlas)</div>
-      <div class="card-desc">~$500, 1-2 дня → Stripe + инвестиции</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card card-item" data-owners="leo">
-      <div class="card-title">Pricing page на лендинге</div>
-      <div class="card-desc">$20/мес Sebastian, $200/мес Ori</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card card-item" data-owners="mayak">
-      <div class="card-title">Demo видео/GIF</div>
-      <div class="card-desc">Лендинг не конвертит без визуала</div>
-      <span class="tag tag-mayak">Маяк</span>
-    </div>
-    <div class="card card-item" data-owners="mayak">
-      <div class="card-title">Утвердить pricing</div>
-      <div class="card-desc">$20/$200 — нужно подтверждение</div>
-      <span class="tag tag-mayak">Маяк</span>
-    </div>
-    <div class="card card-item" data-owners="ori">
-      <div class="card-title">Product Hunt launch</div>
-      <div class="card-desc">Burst трафика + social proof</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card card-item" data-owners="ori">
-      <div class="card-title">System prompt доработка</div>
-      <div class="card-desc">После первого платящего клиента</div>
-      <span class="tag tag-ori">Ori</span>
+    <div class="card-list">
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="getori">
+        <div class="card-title">Переезд → getori.app</div>
+        <div class="card-desc">Новый домен, лендинг, редиректы</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="legal">
+        <div class="card-title">Юрлицо (Stripe Atlas)</div>
+        <div class="card-desc">~$500, 1-2 дня → Stripe + инвестиции</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="pricing-page">
+        <div class="card-title">Pricing page на лендинге</div>
+        <div class="card-desc">$20/мес Sebastian, $200/мес Ori</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="mayak" data-id="demo-video">
+        <div class="card-title">Demo видео/GIF</div>
+        <div class="card-desc">Лендинг не конвертит без визуала</div>
+        <span class="tag tag-mayak">Маяк</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="mayak" data-id="approve-pricing">
+        <div class="card-title">Утвердить pricing</div>
+        <div class="card-desc">$20/$200 — нужно подтверждение</div>
+        <span class="tag tag-mayak">Маяк</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="ph-launch">
+        <div class="card-title">Product Hunt launch</div>
+        <div class="card-desc">Burst трафика + social proof</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="sys-prompt">
+        <div class="card-title">System prompt доработка</div>
+        <div class="card-desc">После первого платящего клиента</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
     </div>
     <div class="empty-msg">Нет задач</div>
   </div>
 
   <!-- SECURITY + BACKLOG -->
-  <div class="column col-backlog">
+  <div class="column col-backlog" data-col="backlog">
     <div class="column-title"><span>🔒 Security + Backlog <span class="column-count"></span></span></div>
-    <div class="card card-item" data-owners="leo">
-      <div class="card-title">P0: Auth на всех инстансах</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card card-item" data-owners="leo">
-      <div class="card-title">P0: bwrap sandbox</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card card-item" data-owners="leo,ori">
-      <div class="card-title">P1: fs-guard hooks</div>
-      <span class="tag tag-leo">Леонид</span> <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card card-item" data-owners="ori">
-      <div class="card-title">P1: DLP на выходе</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card card-item" data-owners="ori">
-      <div class="card-title">Pipeline 20 лидов</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card card-item" data-owners="ori">
-      <div class="card-title">Twitter-стратегия</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card card-item" data-owners="ori">
-      <div class="card-title">Trademark "ORI"</div>
-      <span class="tag tag-ori">Ori</span>
+    <div class="card-list">
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="auth">
+        <div class="card-title">P0: Auth на всех инстансах</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="bwrap">
+        <div class="card-title">P0: bwrap sandbox</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="leo,ori" data-id="fs-guard">
+        <div class="card-title">P1: fs-guard hooks</div>
+        <span class="tag tag-leo">Леонид</span> <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="dlp">
+        <div class="card-title">P1: DLP на выходе</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="pipeline">
+        <div class="card-title">Pipeline 20 лидов</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="twitter-strat">
+        <div class="card-title">Twitter-стратегия</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="trademark">
+        <div class="card-title">Trademark "ORI"</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
     </div>
     <div class="empty-msg">Нет задач</div>
   </div>
 
   <!-- DONE -->
-  <div class="column col-done">
+  <div class="column col-done" data-col="done">
     <div class="column-title"><span>✅ Готово <span class="column-count"></span></span></div>
-    <div class="card ready card-item" data-owners="leo">
-      <div class="card-title">Self-service deploy</div>
-      <div class="card-desc">✅ Снято 5 марта</div>
-      <span class="tag tag-leo">Леонид</span>
-    </div>
-    <div class="card ready card-item" data-owners="ori">
-      <div class="card-title">Лендинги</div>
-      <div class="card-desc">cofounder.run + getsebastian.app</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card ready card-item" data-owners="ori,mayak">
-      <div class="card-title">Sebastian Onboarding v2</div>
-      <div class="card-desc">BOOTSTRAP.md + PCM + TOC</div>
-      <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
-    </div>
-    <div class="card ready card-item" data-owners="mayak">
-      <div class="card-title">Демо Naora</div>
-      <span class="tag tag-mayak">Маяк</span>
-    </div>
-    <div class="card ready card-item" data-owners="all">
-      <div class="card-title">SOUL.md + Манифест</div>
-      <span class="tag tag-all">Все</span>
-    </div>
-    <div class="card ready card-item" data-owners="ori">
-      <div class="card-title">Unit Economics</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card ready card-item" data-owners="ori">
-      <div class="card-title">Twitter API</div>
-      <span class="tag tag-ori">Ori</span>
-    </div>
-    <div class="card ready card-item" data-owners="ori">
-      <div class="card-title">Cron: Board + AI News</div>
-      <span class="tag tag-ori">Ori</span>
+    <div class="card-list">
+      <div class="card ready card-item" draggable="true" data-owners="leo" data-id="deploy-done">
+        <div class="card-title">Self-service deploy</div>
+        <div class="card-desc">✅ Снято 5 марта</div>
+        <span class="tag tag-leo">Леонид</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="landings">
+        <div class="card-title">Лендинги</div>
+        <div class="card-desc">cofounder.run + getsebastian.app</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="ori,mayak" data-id="onboard-v2">
+        <div class="card-title">Sebastian Onboarding v2</div>
+        <div class="card-desc">BOOTSTRAP.md + PCM + TOC</div>
+        <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="mayak" data-id="demo-naora">
+        <div class="card-title">Демо Naora</div>
+        <span class="tag tag-mayak">Маяк</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="all" data-id="soul">
+        <div class="card-title">SOUL.md + Манифест</div>
+        <span class="tag tag-all">Все</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="unit-econ">
+        <div class="card-title">Unit Economics</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="twitter-api">
+        <div class="card-title">Twitter API</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
+      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="cron-setup">
+        <div class="card-title">Cron: Board + AI News</div>
+        <span class="tag tag-ori">Ori</span>
+      </div>
     </div>
     <div class="empty-msg">Нет задач</div>
   </div>
 
 </div>
 
-<div class="footer">Farol Labs · Sebastian ($49) · Ori ($200) · Updated 9 Mar 2026</div>
+<div class="toast" id="toast"></div>
+<div class="footer">Farol Labs · Sebastian ($49) · Ori ($200) · Updated 9 Mar 2026 · Drag cards between columns</div>
 
 <script>
+// --- Filters ---
 const buttons = document.querySelectorAll('.filter-btn');
-const cards = document.querySelectorAll('.card-item');
-const columns = document.querySelectorAll('.column');
+let currentFilter = 'all';
+
+function applyFilter(filter) {
+  currentFilter = filter;
+  buttons.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+  document.querySelectorAll('.card-item').forEach(card => {
+    const owners = card.dataset.owners;
+    if (filter === 'all') card.classList.remove('hidden');
+    else card.classList.toggle('hidden', !(owners.includes(filter) || owners === 'all'));
+  });
+  updateCounts();
+  const url = new URL(window.location);
+  if (filter === 'all') url.searchParams.delete('who');
+  else url.searchParams.set('who', filter);
+  history.replaceState(null, '', url);
+}
+
+buttons.forEach(btn => btn.addEventListener('click', () => applyFilter(btn.dataset.filter)));
 
 function updateCounts() {
-  columns.forEach(col => {
+  document.querySelectorAll('.column').forEach(col => {
     const visible = col.querySelectorAll('.card-item:not(.hidden)').length;
     const counter = col.querySelector('.column-count');
     if (counter) counter.textContent = `(${visible})`;
@@ -262,37 +296,220 @@ function updateCounts() {
   });
 }
 
-function applyFilter(filter) {
-  buttons.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
-  cards.forEach(card => {
-    const owners = card.dataset.owners;
-    if (filter === 'all') {
-      card.classList.remove('hidden');
-    } else {
-      const match = owners.includes(filter) || owners === 'all';
-      card.classList.toggle('hidden', !match);
-    }
-  });
-  updateCounts();
-  // Save to URL
-  const url = new URL(window.location);
-  if (filter === 'all') url.searchParams.delete('who');
-  else url.searchParams.set('who', filter);
-  history.replaceState(null, '', url);
+// --- Toast ---
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-buttons.forEach(btn => {
-  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+// --- Drag & Drop ---
+let draggedCard = null;
+
+document.addEventListener('dragstart', e => {
+  const card = e.target.closest('.card-item');
+  if (!card) return;
+  draggedCard = card;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', card.dataset.id);
 });
 
-// Restore from URL
+document.addEventListener('dragend', e => {
+  if (draggedCard) {
+    draggedCard.classList.remove('dragging');
+    draggedCard = null;
+  }
+  document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+  document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+});
+
+document.querySelectorAll('.card-list').forEach(list => {
+  list.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const col = list.closest('.column');
+    col.classList.add('drag-over');
+
+    // Find insertion point
+    document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+    const cards = [...list.querySelectorAll('.card-item:not(.dragging):not(.hidden)')];
+    let insertBefore = null;
+    for (const c of cards) {
+      const rect = c.getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) { insertBefore = c; break; }
+    }
+    const indicator = document.createElement('div');
+    indicator.className = 'drop-indicator';
+    if (insertBefore) list.insertBefore(indicator, insertBefore);
+    else list.appendChild(indicator);
+  });
+
+  list.addEventListener('dragleave', e => {
+    const col = list.closest('.column');
+    if (!col.contains(e.relatedTarget)) {
+      col.classList.remove('drag-over');
+      list.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+    }
+  });
+
+  list.addEventListener('drop', e => {
+    e.preventDefault();
+    const col = list.closest('.column');
+    col.classList.remove('drag-over');
+
+    if (!draggedCard) return;
+
+    const indicator = list.querySelector('.drop-indicator');
+    if (indicator) {
+      list.insertBefore(draggedCard, indicator);
+      indicator.remove();
+    } else {
+      list.appendChild(draggedCard);
+    }
+
+    // Update card style based on target column
+    const colName = col.dataset.col;
+    draggedCard.classList.remove('blocked', 'progress', 'ready', 'constraint');
+    if (colName === 'done') draggedCard.classList.add('ready');
+    else if (colName === 'progress') draggedCard.classList.add('progress');
+    else if (colName === 'blocked') draggedCard.classList.add('blocked');
+
+    const colLabels = { blocked: '🔴 Блокировано', progress: '🔵 В работе', next: '🟡 Следующее', backlog: '🔒 Backlog', done: '✅ Готово' };
+    const title = draggedCard.querySelector('.card-title').textContent;
+    showToast(`${title} → ${colLabels[colName] || colName}`);
+
+    updateCounts();
+    saveState();
+  });
+});
+
+// --- Persistence (localStorage) ---
+function saveState() {
+  const state = {};
+  document.querySelectorAll('.column').forEach(col => {
+    const colName = col.dataset.col;
+    const ids = [...col.querySelectorAll('.card-item')].map(c => c.dataset.id);
+    state[colName] = ids;
+  });
+  localStorage.setItem('farol-kanban', JSON.stringify(state));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('farol-kanban');
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    const allCards = {};
+    document.querySelectorAll('.card-item').forEach(c => { allCards[c.dataset.id] = c; });
+
+    for (const [colName, ids] of Object.entries(state)) {
+      const col = document.querySelector(`.column[data-col="${colName}"]`);
+      if (!col) continue;
+      const list = col.querySelector('.card-list');
+      ids.forEach(id => {
+        const card = allCards[id];
+        if (card) {
+          list.appendChild(card);
+          card.classList.remove('blocked', 'progress', 'ready');
+          if (colName === 'done') card.classList.add('ready');
+          else if (colName === 'progress') card.classList.add('progress');
+          else if (colName === 'blocked') card.classList.add('blocked');
+        }
+      });
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// --- Touch support for mobile ---
+let touchCard = null;
+let touchClone = null;
+let touchStartX, touchStartY;
+let touchCurrentList = null;
+
+document.addEventListener('touchstart', e => {
+  const card = e.target.closest('.card-item');
+  if (!card) return;
+  touchCard = card;
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (!touchCard) return;
+  const touch = e.touches[0];
+  const dx = Math.abs(touch.clientX - touchStartX);
+  const dy = Math.abs(touch.clientY - touchStartY);
+
+  if (!touchClone && (dx > 10 || dy > 10)) {
+    // Create floating clone
+    touchClone = touchCard.cloneNode(true);
+    touchClone.style.position = 'fixed';
+    touchClone.style.width = touchCard.offsetWidth + 'px';
+    touchClone.style.opacity = '0.85';
+    touchClone.style.zIndex = '999';
+    touchClone.style.pointerEvents = 'none';
+    touchClone.style.transform = 'rotate(2deg) scale(1.03)';
+    touchClone.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+    document.body.appendChild(touchClone);
+    touchCard.classList.add('dragging');
+  }
+
+  if (touchClone) {
+    e.preventDefault();
+    touchClone.style.left = (touch.clientX - touchCard.offsetWidth / 2) + 'px';
+    touchClone.style.top = (touch.clientY - 20) + 'px';
+
+    // Find column under finger
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const col = el ? el.closest('.column') : null;
+    document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+    if (col) {
+      col.classList.add('drag-over');
+      touchCurrentList = col.querySelector('.card-list');
+    }
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  if (touchClone) {
+    touchClone.remove();
+    touchClone = null;
+    touchCard.classList.remove('dragging');
+
+    if (touchCurrentList) {
+      const col = touchCurrentList.closest('.column');
+      touchCurrentList.appendChild(touchCard);
+      col.classList.remove('drag-over');
+
+      const colName = col.dataset.col;
+      touchCard.classList.remove('blocked', 'progress', 'ready');
+      if (colName === 'done') touchCard.classList.add('ready');
+      else if (colName === 'progress') touchCard.classList.add('progress');
+      else if (colName === 'blocked') touchCard.classList.add('blocked');
+
+      const colLabels = { blocked: '🔴 Блокировано', progress: '🔵 В работе', next: '🟡 Следующее', backlog: '🔒 Backlog', done: '✅ Готово' };
+      const title = touchCard.querySelector('.card-title').textContent;
+      showToast(`${title} → ${colLabels[colName] || colName}`);
+
+      updateCounts();
+      saveState();
+    }
+  }
+
+  touchCard = null;
+  touchCurrentList = null;
+  document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+});
+
+// --- Init ---
+loadState();
 const params = new URLSearchParams(window.location.search);
 const who = params.get('who');
-if (who && ['leo', 'mayak', 'ori'].includes(who)) {
-  applyFilter(who);
-} else {
-  updateCounts();
-}
+if (who && ['leo', 'mayak', 'ori'].includes(who)) applyFilter(who);
+else updateCounts();
 </script>
 
 </body>
