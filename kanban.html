@@ -4,88 +4,396 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Farol Labs — Канбан</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --text-secondary: #6b6b6b;
+  --border: #e8e5e0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-drag: 0 12px 36px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  /* Fizzy-inspired vibrant column colors */
+  --col-blocked-bg: #fff0f0;
+  --col-blocked-accent: #e54d42;
+  --col-blocked-light: #fddcda;
+
+  --col-progress-bg: #eef6ff;
+  --col-progress-accent: #3b82f6;
+  --col-progress-light: #dbeafe;
+
+  --col-next-bg: #fefce8;
+  --col-next-accent: #ca8a04;
+  --col-next-light: #fef3c7;
+
+  --col-backlog-bg: #f3f0ff;
+  --col-backlog-accent: #7c3aed;
+  --col-backlog-light: #ede9fe;
+
+  --col-done-bg: #ecfdf5;
+  --col-done-accent: #059669;
+  --col-done-light: #d1fae5;
+}
+
+[data-theme="dark"] {
+  --bg: #111113;
+  --surface: #1c1c1e;
+  --text: #f0eeeb;
+  --text-secondary: #8a8a8e;
+  --border: #2c2c2e;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-drag: 0 12px 36px rgba(0,0,0,0.5);
+
+  --col-blocked-bg: #2a1515;
+  --col-blocked-accent: #f87171;
+  --col-blocked-light: #3d1c1c;
+
+  --col-progress-bg: #151d2e;
+  --col-progress-accent: #60a5fa;
+  --col-progress-light: #1e3050;
+
+  --col-next-bg: #2a2510;
+  --col-next-accent: #fbbf24;
+  --col-next-light: #3d3515;
+
+  --col-backlog-bg: #1e152e;
+  --col-backlog-accent: #a78bfa;
+  --col-backlog-light: #2d1f50;
+
+  --col-done-bg: #0d2818;
+  --col-done-accent: #34d399;
+  --col-done-light: #153d25;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
-h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
-.subtitle { text-align: center; color: #8b949e; margin-bottom: 12px; font-size: 0.95em; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 24px;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
 
-.alert { text-align: center; background: #da3633; color: #fff; padding: 10px 16px; border-radius: 8px; margin: 0 auto 16px; max-width: 700px; font-weight: 600; font-size: 0.95em; }
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.header h1 {
+  font-size: 1.8em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.header h1 span { opacity: 0.3; }
+.subtitle { color: var(--text-secondary); font-size: 0.9em; font-weight: 500; }
 
-.goals { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
-.goal { background: #161b22; border-radius: 8px; padding: 10px 16px; text-align: center; }
-.goal-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
-.goal-value { font-size: 1.2em; font-weight: 700; color: #f0f6fc; }
-.goal-sub { font-size: 0.75em; color: #8b949e; }
+/* Theme toggle */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 1em;
+  z-index: 50;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+}
+.theme-toggle:hover { box-shadow: var(--shadow-hover); }
 
-.filters { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
-.filter-btn { background: #21262d; color: #8b949e; border: 1px solid #30363d; padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.2s; user-select: none; }
-.filter-btn:hover { border-color: #58a6ff; color: #c9d1d9; }
-.filter-btn.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
-.filter-btn[data-filter="all"].active { background: #8b949e33; color: #f0f6fc; border-color: #8b949e; }
-.filter-btn[data-filter="leo"].active { background: #1f6feb33; color: #58a6ff; border-color: #58a6ff; }
-.filter-btn[data-filter="mayak"].active { background: #3fb95033; color: #3fb950; border-color: #3fb950; }
-.filter-btn[data-filter="ori"].active { background: #d2992233; color: #d29922; border-color: #d29922; }
+/* Alert banner */
+.alert-banner {
+  background: linear-gradient(135deg, #e54d42, #d62828);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  margin: 0 auto 16px;
+  max-width: 720px;
+  font-weight: 600;
+  font-size: 0.9em;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(229,77,66,0.3);
+}
 
-.board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 20px; align-items: flex-start; }
-.column { flex: 1; min-width: 260px; max-width: 340px; background: #161b22; border-radius: 10px; padding: 14px; transition: background 0.2s; min-height: 120px; }
-.column.drag-over { background: #1c2333; outline: 2px dashed #58a6ff; outline-offset: -2px; }
-.column-title { font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid; display: flex; justify-content: space-between; align-items: center; }
-.column-count { font-size: 0.75em; font-weight: 400; opacity: 0.6; }
-.col-blocked .column-title { color: #f85149; border-color: #f85149; }
-.col-progress .column-title { color: #58a6ff; border-color: #58a6ff; }
-.col-next .column-title { color: #d29922; border-color: #d29922; }
-.col-backlog .column-title { color: #8b949e; border-color: #30363d; }
-.col-done .column-title { color: #3fb950; border-color: #3fb950; }
+/* Stats row */
+.stats {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  min-width: 100px;
+}
+.stat-label { font-size: 0.65em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+.stat-value { font-size: 1.4em; font-weight: 800; margin-top: 2px; }
+.stat-sub { font-size: 0.7em; color: var(--text-secondary); font-weight: 500; }
 
-.card-list { min-height: 40px; }
+/* Filters */
+.filters {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.82em;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.15s;
+  user-select: none;
+}
+.filter-btn:hover { border-color: var(--text-secondary); color: var(--text); transform: translateY(-1px); }
+.filter-btn.active { color: #fff; border-color: transparent; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.filter-btn[data-filter="all"].active { background: var(--text); }
+.filter-btn[data-filter="leo"].active { background: #3b82f6; }
+.filter-btn[data-filter="mayak"].active { background: #059669; }
+.filter-btn[data-filter="ori"].active { background: #ca8a04; }
 
-.card { background: #21262d; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 3px solid #30363d; transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s; cursor: grab; user-select: none; }
+/* Board */
+.board {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 24px;
+  align-items: flex-start;
+  scroll-snap-type: x mandatory;
+}
+.board::-webkit-scrollbar { height: 6px; }
+.board::-webkit-scrollbar-track { background: transparent; }
+.board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Columns */
+.column {
+  flex: 1;
+  min-width: 270px;
+  max-width: 320px;
+  border-radius: var(--radius);
+  padding: 10px;
+  transition: all 0.2s;
+  min-height: 140px;
+  scroll-snap-align: start;
+}
+.column.drag-over { outline: 2px dashed var(--col-progress-accent); outline-offset: -2px; transform: scale(1.01); }
+
+.col-blocked { background: var(--col-blocked-bg); }
+.col-progress { background: var(--col-progress-bg); }
+.col-next { background: var(--col-next-bg); }
+.col-backlog { background: var(--col-backlog-bg); }
+.col-done { background: var(--col-done-bg); }
+
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 10px;
+}
+.column-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.col-blocked .column-dot { background: var(--col-blocked-accent); }
+.col-progress .column-dot { background: var(--col-progress-accent); }
+.col-next .column-dot { background: var(--col-next-accent); }
+.col-backlog .column-dot { background: var(--col-backlog-accent); }
+.col-done .column-dot { background: var(--col-done-accent); }
+
+.column-name {
+  font-size: 0.78em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.col-blocked .column-name { color: var(--col-blocked-accent); }
+.col-progress .column-name { color: var(--col-progress-accent); }
+.col-next .column-name { color: var(--col-next-accent); }
+.col-backlog .column-name { color: var(--col-backlog-accent); }
+.col-done .column-name { color: var(--col-done-accent); }
+
+.column-count {
+  font-size: 0.7em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-left: auto;
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 22px;
+  text-align: center;
+}
+
+/* Cards */
+.card-list { min-height: 30px; }
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.15s, transform 0.15s, opacity 0.2s;
+  border: 1px solid var(--border);
+  position: relative;
+}
+.card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
 .card:active { cursor: grabbing; }
-.card.dragging { opacity: 0.4; transform: scale(0.96); }
+.card.dragging { opacity: 0.3; transform: scale(0.97); }
 .card.hidden { display: none; }
-.card-title { font-weight: 600; font-size: 0.9em; color: #f0f6fc; margin-bottom: 4px; pointer-events: none; }
-.card-desc { font-size: 0.8em; color: #8b949e; line-height: 1.4; pointer-events: none; }
-.tag { display: inline-block; font-size: 0.7em; padding: 2px 7px; border-radius: 10px; font-weight: 600; margin-right: 4px; margin-top: 6px; pointer-events: none; }
-.tag-leo { background: #1f6feb33; color: #58a6ff; }
-.tag-mayak { background: #3fb95033; color: #3fb950; }
-.tag-ori { background: #d2992233; color: #d29922; }
-.tag-all { background: #8b949e33; color: #8b949e; }
-.card.blocked { border-left-color: #f85149; }
-.card.progress { border-left-color: #58a6ff; }
-.card.ready { border-left-color: #3fb950; }
 
-.constraint { background: #f8514922; border: 1px solid #f8514966; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; cursor: grab; user-select: none; transition: opacity 0.2s; }
-.constraint:active { cursor: grabbing; }
-.constraint.dragging { opacity: 0.4; }
-.constraint.hidden { display: none; }
-.constraint .card-title { color: #f85149; pointer-events: none; }
-.constraint .card-desc { pointer-events: none; }
-.constraint .tag { pointer-events: none; }
+.card-title {
+  font-weight: 600;
+  font-size: 0.88em;
+  color: var(--text);
+  margin-bottom: 3px;
+  pointer-events: none;
+  line-height: 1.3;
+}
+.card-desc {
+  font-size: 0.78em;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  pointer-events: none;
+}
 
-.drop-indicator { height: 3px; background: #58a6ff; border-radius: 2px; margin: 4px 0; transition: opacity 0.15s; }
+/* Color accent stripe */
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+.col-blocked .card::before { background: var(--col-blocked-accent); }
+.col-progress .card::before { background: var(--col-progress-accent); }
+.col-next .card::before { background: var(--col-next-accent); }
+.col-backlog .card::before { background: var(--col-backlog-accent); }
+.col-done .card::before { background: var(--col-done-accent); }
 
-.empty-msg { text-align: center; color: #484f58; font-size: 0.8em; padding: 20px 10px; display: none; }
+/* Tags */
+.tags { margin-top: 8px; pointer-events: none; }
+.tag {
+  display: inline-block;
+  font-size: 0.68em;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.tag-leo { background: #dbeafe; color: #2563eb; }
+.tag-mayak { background: #d1fae5; color: #047857; }
+.tag-ori { background: #fef3c7; color: #a16207; }
+.tag-all { background: #f3f4f6; color: #6b7280; }
+[data-theme="dark"] .tag-leo { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .tag-mayak { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .tag-ori { background: #451a03; color: #fcd34d; }
+[data-theme="dark"] .tag-all { background: #374151; color: #d1d5db; }
+
+/* Constraint card (blocked) */
+.card.constraint-card {
+  border-color: var(--col-blocked-accent);
+  border-width: 1.5px;
+}
+.card.constraint-card .card-title { color: var(--col-blocked-accent); }
+
+/* Drop indicator */
+.drop-indicator {
+  height: 3px;
+  background: var(--col-progress-accent);
+  border-radius: 2px;
+  margin: 4px 0;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* Empty */
+.empty-msg {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.8em;
+  padding: 24px 10px;
+  display: none;
+  opacity: 0.5;
+}
 .column.all-hidden .empty-msg { display: block; }
 
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1f6feb; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.85em; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
-.toast.show { opacity: 1; }
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 22px;
+  border-radius: 20px;
+  font-size: 0.82em;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.footer { text-align: center; color: #484f58; font-size: 0.75em; margin-top: 10px; }
+.footer {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.72em;
+  margin-top: 12px;
+  font-weight: 500;
+  opacity: 0.6;
+}
 </style>
 </head>
 <body>
 
-<h1>🦀 Farol Labs — Канбан</h1>
-<p class="subtitle">9 марта 2026 · 75 дней до дедлайна</p>
+<button class="theme-toggle" onclick="toggleTheme()" title="Тёмная/Светлая тема">🌓</button>
 
-<div class="alert">🔴 BILLING НЕ ПОДКЛЮЧЁН — 17 дней простоя · Revenue = $0 · ~$200/день потерянного MRR</div>
+<div class="header">
+  <h1>🦀 Farol Labs</h1>
+  <p class="subtitle">9 марта 2026 · 75 дней до дедлайна</p>
+</div>
 
-<div class="goals">
-  <div class="goal"><div class="goal-label">Цель</div><div class="goal-value">$200K</div><div class="goal-sub">к 23 мая 2026</div></div>
-  <div class="goal"><div class="goal-label">Revenue</div><div class="goal-value" style="color:#f85149">$0</div><div class="goal-sub">нет billing</div></div>
-  <div class="goal"><div class="goal-label">Осталось</div><div class="goal-value">75 дн</div><div class="goal-sub">10.5 недель</div></div>
-  <div class="goal"><div class="goal-label">Exit цель</div><div class="goal-value">≥$100M</div><div class="goal-sub">Farol Labs</div></div>
+<div class="alert-banner">⛔ Billing не подключён — 17 дней простоя · Revenue $0 · ~$200/день упущено</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">Цель</div><div class="stat-value">$200K</div><div class="stat-sub">к 23 мая 2026</div></div>
+  <div class="stat"><div class="stat-label">Revenue</div><div class="stat-value" style="color:var(--col-blocked-accent)">$0</div><div class="stat-sub">нет billing</div></div>
+  <div class="stat"><div class="stat-label">Осталось</div><div class="stat-value">75</div><div class="stat-sub">дней</div></div>
+  <div class="stat"><div class="stat-label">Exit</div><div class="stat-value">$100M+</div><div class="stat-sub">Farol Labs</div></div>
 </div>
 
 <div class="filters">
@@ -99,174 +407,203 @@ h1 { text-align: center; font-size: 1.6em; margin-bottom: 6px; color: #f0f6fc; }
 
   <!-- BLOCKED -->
   <div class="column col-blocked" data-col="blocked">
-    <div class="column-title"><span>🔴 Блокировано <span class="column-count"></span></span></div>
+    <div class="column-header">
+      <div class="column-dot"></div>
+      <div class="column-name">Блокировано</div>
+      <div class="column-count">0</div>
+    </div>
     <div class="card-list">
-      <div class="constraint card-item" draggable="true" data-owners="leo" data-id="billing">
+      <div class="card constraint-card card-item" draggable="true" data-owners="leo" data-id="billing">
         <div class="card-title">⛔ Billing (Stripe)</div>
-        <div class="card-desc">Нет юрлица → нет Stripe → revenue = $0.<br>Workaround: Lemonsqueezy / Paddle</div>
-        <span class="tag tag-leo">Леонид</span>
+        <div class="card-desc">Нет юрлица → нет Stripe → revenue = $0. Workaround: Lemonsqueezy / Paddle</div>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
-      <div class="constraint card-item" draggable="true" data-owners="ori,mayak" data-id="onboarding">
+      <div class="card constraint-card card-item" draggable="true" data-owners="ori,mayak" data-id="onboarding">
         <div class="card-title">⚠️ Онбординг Ori</div>
-        <div class="card-desc">Клиент не видит разницу с ChatGPT в первые 30 мин.</div>
-        <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+        <div class="card-desc">Клиент не видит разницу с ChatGPT в первые 30 мин</div>
+        <div class="tags"><span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span></div>
       </div>
     </div>
-    <div class="empty-msg">Нет задач</div>
+    <div class="empty-msg">Пусто ✨</div>
   </div>
 
   <!-- IN PROGRESS -->
   <div class="column col-progress" data-col="progress">
-    <div class="column-title"><span>🔵 В работе <span class="column-count"></span></span></div>
+    <div class="column-header">
+      <div class="column-dot"></div>
+      <div class="column-name">В работе</div>
+      <div class="column-count">0</div>
+    </div>
     <div class="card-list">
-      <div class="card progress card-item" draggable="true" data-owners="leo" data-id="self-service">
-        <div class="card-title">Self-service deploy + Billing</div>
-        <div class="card-desc">Автодеплой ✅, теперь billing + MiniMax</div>
-        <span class="tag tag-leo">Леонид</span>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="self-service">
+        <div class="card-title">Self-service + Billing</div>
+        <div class="card-desc">Автодеплой ✅ · Billing + MiniMax интеграция</div>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
-      <div class="card progress card-item" draggable="true" data-owners="mayak" data-id="sales">
-        <div class="card-title">Sales + онбординг клиентов</div>
-        <div class="card-desc">5 лидов: Naora, BUNT, SHAMAN, Leads4You, Deepn</div>
-        <span class="tag tag-mayak">Маяк</span>
+      <div class="card card-item" draggable="true" data-owners="mayak" data-id="sales">
+        <div class="card-title">Sales + онбординг</div>
+        <div class="card-desc">Naora · BUNT · SHAMAN · Leads4You · Deepn</div>
+        <div class="tags"><span class="tag tag-mayak">Маяк</span></div>
       </div>
-      <div class="card progress card-item" draggable="true" data-owners="ori" data-id="tg-ph">
-        <div class="card-title">TG продвижение + Product Hunt</div>
-        <div class="card-desc">Research. Prep — НЕ запускать до billing.</div>
-        <span class="tag tag-ori">Ori</span>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="tg-ph">
+        <div class="card-title">TG продвижение + PH</div>
+        <div class="card-desc">Research каналов. Prep — не запускать до billing</div>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
     </div>
-    <div class="empty-msg">Нет задач</div>
+    <div class="empty-msg">Пусто ✨</div>
   </div>
 
   <!-- NEXT -->
   <div class="column col-next" data-col="next">
-    <div class="column-title"><span>🟡 Следующее <span class="column-count"></span></span></div>
+    <div class="column-header">
+      <div class="column-dot"></div>
+      <div class="column-name">Следующее</div>
+      <div class="column-count">0</div>
+    </div>
     <div class="card-list">
       <div class="card card-item" draggable="true" data-owners="leo" data-id="getori">
         <div class="card-title">Переезд → getori.app</div>
         <div class="card-desc">Новый домен, лендинг, редиректы</div>
-        <span class="tag tag-leo">Леонид</span>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="leo" data-id="legal">
         <div class="card-title">Юрлицо (Stripe Atlas)</div>
         <div class="card-desc">~$500, 1-2 дня → Stripe + инвестиции</div>
-        <span class="tag tag-leo">Леонид</span>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="leo" data-id="pricing-page">
-        <div class="card-title">Pricing page на лендинге</div>
-        <div class="card-desc">$20/мес Sebastian, $200/мес Ori</div>
-        <span class="tag tag-leo">Леонид</span>
+        <div class="card-title">Pricing page</div>
+        <div class="card-desc">$20/мес Sebastian · $200/мес Ori</div>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="mayak" data-id="demo-video">
         <div class="card-title">Demo видео/GIF</div>
         <div class="card-desc">Лендинг не конвертит без визуала</div>
-        <span class="tag tag-mayak">Маяк</span>
+        <div class="tags"><span class="tag tag-mayak">Маяк</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="mayak" data-id="approve-pricing">
         <div class="card-title">Утвердить pricing</div>
         <div class="card-desc">$20/$200 — нужно подтверждение</div>
-        <span class="tag tag-mayak">Маяк</span>
+        <div class="tags"><span class="tag tag-mayak">Маяк</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="ph-launch">
         <div class="card-title">Product Hunt launch</div>
         <div class="card-desc">Burst трафика + social proof</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="sys-prompt">
         <div class="card-title">System prompt доработка</div>
         <div class="card-desc">После первого платящего клиента</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
     </div>
-    <div class="empty-msg">Нет задач</div>
+    <div class="empty-msg">Пусто ✨</div>
   </div>
 
-  <!-- SECURITY + BACKLOG -->
+  <!-- BACKLOG -->
   <div class="column col-backlog" data-col="backlog">
-    <div class="column-title"><span>🔒 Security + Backlog <span class="column-count"></span></span></div>
+    <div class="column-header">
+      <div class="column-dot"></div>
+      <div class="column-name">Security + Backlog</div>
+      <div class="column-count">0</div>
+    </div>
     <div class="card-list">
       <div class="card card-item" draggable="true" data-owners="leo" data-id="auth">
-        <div class="card-title">P0: Auth на всех инстансах</div>
-        <span class="tag tag-leo">Леонид</span>
+        <div class="card-title">P0: Auth на инстансах</div>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="leo" data-id="bwrap">
         <div class="card-title">P0: bwrap sandbox</div>
-        <span class="tag tag-leo">Леонид</span>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="leo,ori" data-id="fs-guard">
         <div class="card-title">P1: fs-guard hooks</div>
-        <span class="tag tag-leo">Леонид</span> <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-leo">Леонид</span> <span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="dlp">
         <div class="card-title">P1: DLP на выходе</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="pipeline">
         <div class="card-title">Pipeline 20 лидов</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="twitter-strat">
         <div class="card-title">Twitter-стратегия</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="trademark">
         <div class="card-title">Trademark "ORI"</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
     </div>
-    <div class="empty-msg">Нет задач</div>
+    <div class="empty-msg">Пусто ✨</div>
   </div>
 
   <!-- DONE -->
   <div class="column col-done" data-col="done">
-    <div class="column-title"><span>✅ Готово <span class="column-count"></span></span></div>
+    <div class="column-header">
+      <div class="column-dot"></div>
+      <div class="column-name">Готово</div>
+      <div class="column-count">0</div>
+    </div>
     <div class="card-list">
-      <div class="card ready card-item" draggable="true" data-owners="leo" data-id="deploy-done">
-        <div class="card-title">Self-service deploy</div>
-        <div class="card-desc">✅ Снято 5 марта</div>
-        <span class="tag tag-leo">Леонид</span>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="deploy-done">
+        <div class="card-title">Self-service deploy ✅</div>
+        <div class="card-desc">Снято 5 марта</div>
+        <div class="tags"><span class="tag tag-leo">Леонид</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="landings">
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="landings">
         <div class="card-title">Лендинги</div>
         <div class="card-desc">cofounder.run + getsebastian.app</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="ori,mayak" data-id="onboard-v2">
+      <div class="card card-item" draggable="true" data-owners="ori,mayak" data-id="onboard-v2">
         <div class="card-title">Sebastian Onboarding v2</div>
         <div class="card-desc">BOOTSTRAP.md + PCM + TOC</div>
-        <span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Маяк</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="mayak" data-id="demo-naora">
+      <div class="card card-item" draggable="true" data-owners="mayak" data-id="demo-naora">
         <div class="card-title">Демо Naora</div>
-        <span class="tag tag-mayak">Маяк</span>
+        <div class="tags"><span class="tag tag-mayak">Маяк</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="all" data-id="soul">
+      <div class="card card-item" draggable="true" data-owners="all" data-id="soul">
         <div class="card-title">SOUL.md + Манифест</div>
-        <span class="tag tag-all">Все</span>
+        <div class="tags"><span class="tag tag-all">Все</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="unit-econ">
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="unit-econ">
         <div class="card-title">Unit Economics</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="twitter-api">
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="twitter-api">
         <div class="card-title">Twitter API</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
-      <div class="card ready card-item" draggable="true" data-owners="ori" data-id="cron-setup">
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="cron-setup">
         <div class="card-title">Cron: Board + AI News</div>
-        <span class="tag tag-ori">Ori</span>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
     </div>
-    <div class="empty-msg">Нет задач</div>
+    <div class="empty-msg">Пусто ✨</div>
   </div>
 
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="footer">Farol Labs · Sebastian ($49) · Ori ($200) · Updated 9 Mar 2026 · Drag cards between columns</div>
+<div class="footer">Farol Labs · Перетаскивай карточки между колонками · Обновлено 9 марта 2026</div>
 
 <script>
-// --- Filters ---
+/* --- Theme --- */
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('farol-theme', isDark ? 'light' : 'dark');
+}
+const savedTheme = localStorage.getItem('farol-theme');
+if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+/* --- Filters --- */
 const buttons = document.querySelectorAll('.filter-btn');
 let currentFilter = 'all';
 
@@ -284,27 +621,26 @@ function applyFilter(filter) {
   else url.searchParams.set('who', filter);
   history.replaceState(null, '', url);
 }
-
 buttons.forEach(btn => btn.addEventListener('click', () => applyFilter(btn.dataset.filter)));
 
 function updateCounts() {
   document.querySelectorAll('.column').forEach(col => {
     const visible = col.querySelectorAll('.card-item:not(.hidden)').length;
-    const counter = col.querySelector('.column-count');
-    if (counter) counter.textContent = `(${visible})`;
+    col.querySelector('.column-count').textContent = visible;
     col.classList.toggle('all-hidden', visible === 0);
   });
 }
 
-// --- Toast ---
+/* --- Toast --- */
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// --- Drag & Drop ---
+/* --- Drag & Drop (desktop) --- */
 let draggedCard = null;
 
 document.addEventListener('dragstart', e => {
@@ -316,11 +652,8 @@ document.addEventListener('dragstart', e => {
   e.dataTransfer.setData('text/plain', card.dataset.id);
 });
 
-document.addEventListener('dragend', e => {
-  if (draggedCard) {
-    draggedCard.classList.remove('dragging');
-    draggedCard = null;
-  }
+document.addEventListener('dragend', () => {
+  if (draggedCard) { draggedCard.classList.remove('dragging'); draggedCard = null; }
   document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
   document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
 });
@@ -329,10 +662,7 @@ document.querySelectorAll('.card-list').forEach(list => {
   list.addEventListener('dragover', e => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    const col = list.closest('.column');
-    col.classList.add('drag-over');
-
-    // Find insertion point
+    list.closest('.column').classList.add('drag-over');
     document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
     const cards = [...list.querySelectorAll('.card-item:not(.dragging):not(.hidden)')];
     let insertBefore = null;
@@ -358,157 +688,101 @@ document.querySelectorAll('.card-list').forEach(list => {
     e.preventDefault();
     const col = list.closest('.column');
     col.classList.remove('drag-over');
-
     if (!draggedCard) return;
-
     const indicator = list.querySelector('.drop-indicator');
-    if (indicator) {
-      list.insertBefore(draggedCard, indicator);
-      indicator.remove();
-    } else {
-      list.appendChild(draggedCard);
-    }
-
-    // Update card style based on target column
-    const colName = col.dataset.col;
-    draggedCard.classList.remove('blocked', 'progress', 'ready', 'constraint');
-    if (colName === 'done') draggedCard.classList.add('ready');
-    else if (colName === 'progress') draggedCard.classList.add('progress');
-    else if (colName === 'blocked') draggedCard.classList.add('blocked');
-
-    const colLabels = { blocked: '🔴 Блокировано', progress: '🔵 В работе', next: '🟡 Следующее', backlog: '🔒 Backlog', done: '✅ Готово' };
-    const title = draggedCard.querySelector('.card-title').textContent;
-    showToast(`${title} → ${colLabels[colName] || colName}`);
-
+    if (indicator) { list.insertBefore(draggedCard, indicator); indicator.remove(); }
+    else list.appendChild(draggedCard);
+    const colLabels = { blocked:'Блокировано', progress:'В работе', next:'Следующее', backlog:'Backlog', done:'Готово' };
+    showToast(`→ ${colLabels[col.dataset.col]}`);
     updateCounts();
     saveState();
   });
 });
 
-// --- Persistence (localStorage) ---
-function saveState() {
-  const state = {};
-  document.querySelectorAll('.column').forEach(col => {
-    const colName = col.dataset.col;
-    const ids = [...col.querySelectorAll('.card-item')].map(c => c.dataset.id);
-    state[colName] = ids;
-  });
-  localStorage.setItem('farol-kanban', JSON.stringify(state));
-}
-
-function loadState() {
-  const raw = localStorage.getItem('farol-kanban');
-  if (!raw) return;
-  try {
-    const state = JSON.parse(raw);
-    const allCards = {};
-    document.querySelectorAll('.card-item').forEach(c => { allCards[c.dataset.id] = c; });
-
-    for (const [colName, ids] of Object.entries(state)) {
-      const col = document.querySelector(`.column[data-col="${colName}"]`);
-      if (!col) continue;
-      const list = col.querySelector('.card-list');
-      ids.forEach(id => {
-        const card = allCards[id];
-        if (card) {
-          list.appendChild(card);
-          card.classList.remove('blocked', 'progress', 'ready');
-          if (colName === 'done') card.classList.add('ready');
-          else if (colName === 'progress') card.classList.add('progress');
-          else if (colName === 'blocked') card.classList.add('blocked');
-        }
-      });
-    }
-  } catch (e) { /* ignore */ }
-}
-
-// --- Touch support for mobile ---
-let touchCard = null;
-let touchClone = null;
-let touchStartX, touchStartY;
-let touchCurrentList = null;
+/* --- Touch drag (mobile) --- */
+let touchCard = null, touchClone = null, touchStartX, touchStartY, touchCurrentList = null;
 
 document.addEventListener('touchstart', e => {
   const card = e.target.closest('.card-item');
   if (!card) return;
   touchCard = card;
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
+  const t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
 }, { passive: true });
 
 document.addEventListener('touchmove', e => {
   if (!touchCard) return;
-  const touch = e.touches[0];
-  const dx = Math.abs(touch.clientX - touchStartX);
-  const dy = Math.abs(touch.clientY - touchStartY);
-
-  if (!touchClone && (dx > 10 || dy > 10)) {
-    // Create floating clone
+  const t = e.touches[0];
+  if (!touchClone && (Math.abs(t.clientX - touchStartX) > 8 || Math.abs(t.clientY - touchStartY) > 8)) {
     touchClone = touchCard.cloneNode(true);
-    touchClone.style.position = 'fixed';
-    touchClone.style.width = touchCard.offsetWidth + 'px';
-    touchClone.style.opacity = '0.85';
-    touchClone.style.zIndex = '999';
-    touchClone.style.pointerEvents = 'none';
-    touchClone.style.transform = 'rotate(2deg) scale(1.03)';
-    touchClone.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+    Object.assign(touchClone.style, {
+      position:'fixed', width:touchCard.offsetWidth+'px', opacity:'0.9', zIndex:'999',
+      pointerEvents:'none', transform:'rotate(1.5deg) scale(1.04)', boxShadow:'0 12px 40px rgba(0,0,0,0.25)',
+      borderRadius:'var(--radius-sm)'
+    });
     document.body.appendChild(touchClone);
     touchCard.classList.add('dragging');
   }
-
   if (touchClone) {
     e.preventDefault();
-    touchClone.style.left = (touch.clientX - touchCard.offsetWidth / 2) + 'px';
-    touchClone.style.top = (touch.clientY - 20) + 'px';
-
-    // Find column under finger
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    touchClone.style.left = (t.clientX - touchCard.offsetWidth/2) + 'px';
+    touchClone.style.top = (t.clientY - 20) + 'px';
+    const el = document.elementFromPoint(t.clientX, t.clientY);
     const col = el ? el.closest('.column') : null;
     document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
-    if (col) {
-      col.classList.add('drag-over');
-      touchCurrentList = col.querySelector('.card-list');
-    }
+    if (col) { col.classList.add('drag-over'); touchCurrentList = col.querySelector('.card-list'); }
   }
 }, { passive: false });
 
-document.addEventListener('touchend', e => {
+document.addEventListener('touchend', () => {
   if (touchClone) {
-    touchClone.remove();
-    touchClone = null;
+    touchClone.remove(); touchClone = null;
     touchCard.classList.remove('dragging');
-
     if (touchCurrentList) {
       const col = touchCurrentList.closest('.column');
       touchCurrentList.appendChild(touchCard);
       col.classList.remove('drag-over');
-
-      const colName = col.dataset.col;
-      touchCard.classList.remove('blocked', 'progress', 'ready');
-      if (colName === 'done') touchCard.classList.add('ready');
-      else if (colName === 'progress') touchCard.classList.add('progress');
-      else if (colName === 'blocked') touchCard.classList.add('blocked');
-
-      const colLabels = { blocked: '🔴 Блокировано', progress: '🔵 В работе', next: '🟡 Следующее', backlog: '🔒 Backlog', done: '✅ Готово' };
-      const title = touchCard.querySelector('.card-title').textContent;
-      showToast(`${title} → ${colLabels[colName] || colName}`);
-
+      const colLabels = { blocked:'Блокировано', progress:'В работе', next:'Следующее', backlog:'Backlog', done:'Готово' };
+      showToast(`→ ${colLabels[col.dataset.col]}`);
       updateCounts();
       saveState();
     }
   }
-
-  touchCard = null;
-  touchCurrentList = null;
+  touchCard = null; touchCurrentList = null;
   document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
 });
 
-// --- Init ---
+/* --- Persistence --- */
+function saveState() {
+  const state = {};
+  document.querySelectorAll('.column').forEach(col => {
+    state[col.dataset.col] = [...col.querySelectorAll('.card-item')].map(c => c.dataset.id);
+  });
+  localStorage.setItem('farol-kanban-v2', JSON.stringify(state));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('farol-kanban-v2');
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    const all = {};
+    document.querySelectorAll('.card-item').forEach(c => { all[c.dataset.id] = c; });
+    for (const [colName, ids] of Object.entries(state)) {
+      const col = document.querySelector(`.column[data-col="${colName}"]`);
+      if (!col) continue;
+      const list = col.querySelector('.card-list');
+      ids.forEach(id => { if (all[id]) list.appendChild(all[id]); });
+    }
+  } catch(e) {}
+}
+
+/* --- Init --- */
 loadState();
 const params = new URLSearchParams(window.location.search);
 const who = params.get('who');
-if (who && ['leo', 'mayak', 'ori'].includes(who)) applyFilter(who);
+if (who && ['leo','mayak','ori'].includes(who)) applyFilter(who);
 else updateCounts();
 </script>
 
