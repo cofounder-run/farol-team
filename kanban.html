@@ -8,44 +8,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f5f3ef;
-  --surface: #ffffff;
-  --text: #1a1a1a;
-  --text-secondary: #6b6b6b;
+  --bg: #f5f3ef; --surface: #ffffff; --text: #1a1a1a; --text-secondary: #6b6b6b;
   --border: #e8e5e0;
   --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-hover: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow-drag: 0 12px 36px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
-  --radius: 12px;
-  --radius-sm: 8px;
+  --radius: 12px; --radius-sm: 8px;
 
-  --col-notnow-bg: #f3f4f6; --col-notnow-accent: #9ca3af; --col-notnow-light: #e5e7eb;
-  --col-maybe-bg: #faf5ff; --col-maybe-accent: #a855f7; --col-maybe-light: #f3e8ff;
-  --col-blocked-bg: #fff0f0; --col-blocked-accent: #e54d42; --col-blocked-light: #fddcda;
-  --col-progress-bg: #eef6ff; --col-progress-accent: #3b82f6; --col-progress-light: #dbeafe;
-  --col-next-bg: #fefce8; --col-next-accent: #ca8a04; --col-next-light: #fef3c7;
-  --col-done-bg: #ecfdf5; --col-done-accent: #059669; --col-done-light: #d1fae5;
-  --col-backlog-bg: #f8f8f8; --col-backlog-accent: #71717a; --col-backlog-light: #e4e4e7;
+  --col-notnow-bg: #f3f4f6; --col-notnow-accent: #9ca3af;
+  --col-maybe-bg: #faf5ff; --col-maybe-accent: #a855f7;
+  --col-progress-bg: #eef6ff; --col-progress-accent: #3b82f6;
+  --col-next-bg: #fefce8; --col-next-accent: #ca8a04;
+  --col-done-bg: #ecfdf5; --col-done-accent: #059669;
+
+  --blocked-border: #e54d42; --blocked-bg: #fff5f5; --blocked-badge: #dc2626;
 }
-
 [data-theme="dark"] {
   --bg: #111113; --surface: #1c1c1e; --text: #f0eeeb; --text-secondary: #8a8a8e;
   --border: #2c2c2e; --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-hover: 0 4px 12px rgba(0,0,0,0.4);
 
-  --col-notnow-bg: #1a1a1c; --col-notnow-accent: #71717a; --col-notnow-light: #27272a;
-  --col-maybe-bg: #1e152e; --col-maybe-accent: #c084fc; --col-maybe-light: #2d1f50;
-  --col-blocked-bg: #2a1515; --col-blocked-accent: #f87171; --col-blocked-light: #3d1c1c;
-  --col-progress-bg: #151d2e; --col-progress-accent: #60a5fa; --col-progress-light: #1e3050;
-  --col-next-bg: #2a2510; --col-next-accent: #fbbf24; --col-next-light: #3d3515;
-  --col-done-bg: #0d2818; --col-done-accent: #34d399; --col-done-light: #153d25;
-  --col-backlog-bg: #18181b; --col-backlog-accent: #a1a1aa; --col-backlog-light: #27272a;
+  --col-notnow-bg: #1a1a1c; --col-notnow-accent: #71717a;
+  --col-maybe-bg: #1e152e; --col-maybe-accent: #c084fc;
+  --col-progress-bg: #151d2e; --col-progress-accent: #60a5fa;
+  --col-next-bg: #2a2510; --col-next-accent: #fbbf24;
+  --col-done-bg: #0d2818; --col-done-accent: #34d399;
+
+  --blocked-border: #f87171; --blocked-bg: #2a1515; --blocked-badge: #ef4444;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg); color: var(--text);
-  padding: 24px; min-height: 100vh; transition: background 0.3s, color 0.3s;
+  background: var(--bg); color: var(--text); padding: 24px; min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
 }
 
 .header { text-align: center; margin-bottom: 20px; }
@@ -54,7 +48,8 @@ body {
 
 .theme-toggle {
   position: fixed; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 12px; cursor: pointer; font-size: 1em; z-index: 50; box-shadow: var(--shadow); transition: all 0.2s;
+  border-radius: 20px; padding: 6px 12px; cursor: pointer; font-size: 1em; z-index: 50;
+  box-shadow: var(--shadow); transition: all 0.2s;
 }
 .theme-toggle:hover { box-shadow: var(--shadow-hover); }
 
@@ -95,37 +90,31 @@ body {
 .board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 .column {
-  flex: 1; min-width: 240px; max-width: 300px; border-radius: var(--radius);
+  flex: 1; min-width: 260px; max-width: 320px; border-radius: var(--radius);
   padding: 10px; transition: all 0.2s; min-height: 140px; scroll-snap-align: start;
 }
 .column.drag-over { outline: 2px dashed var(--col-progress-accent); outline-offset: -2px; transform: scale(1.01); }
 
 .col-notnow { background: var(--col-notnow-bg); }
 .col-maybe { background: var(--col-maybe-bg); }
-.col-blocked { background: var(--col-blocked-bg); }
 .col-progress { background: var(--col-progress-bg); }
 .col-next { background: var(--col-next-bg); }
 .col-done { background: var(--col-done-bg); }
-.col-backlog { background: var(--col-backlog-bg); }
 
 .column-header { display: flex; align-items: center; gap: 8px; padding: 6px 6px 10px; }
 .column-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .col-notnow .column-dot { background: var(--col-notnow-accent); }
 .col-maybe .column-dot { background: var(--col-maybe-accent); }
-.col-blocked .column-dot { background: var(--col-blocked-accent); }
 .col-progress .column-dot { background: var(--col-progress-accent); }
 .col-next .column-dot { background: var(--col-next-accent); }
 .col-done .column-dot { background: var(--col-done-accent); }
-.col-backlog .column-dot { background: var(--col-backlog-accent); }
 
 .column-name { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
 .col-notnow .column-name { color: var(--col-notnow-accent); }
 .col-maybe .column-name { color: var(--col-maybe-accent); }
-.col-blocked .column-name { color: var(--col-blocked-accent); }
 .col-progress .column-name { color: var(--col-progress-accent); }
 .col-next .column-name { color: var(--col-next-accent); }
 .col-done .column-name { color: var(--col-done-accent); }
-.col-backlog .column-name { color: var(--col-backlog-accent); }
 
 .column-count {
   font-size: 0.7em; font-weight: 600; color: var(--text-secondary); margin-left: auto;
@@ -137,7 +126,8 @@ body {
 .card {
   background: var(--surface); border-radius: var(--radius-sm); padding: 12px 14px;
   margin-bottom: 8px; box-shadow: var(--shadow); cursor: grab; user-select: none;
-  transition: box-shadow 0.15s, transform 0.15s, opacity 0.2s; border: 1px solid var(--border); position: relative;
+  transition: box-shadow 0.15s, transform 0.15s, opacity 0.2s;
+  border: 1px solid var(--border); position: relative;
 }
 .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
 .card:active { cursor: grabbing; }
@@ -149,13 +139,26 @@ body {
 .card::before {
   content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 2px 2px 0;
 }
-.col-notnow .card::before { background: var(--col-notnow-accent); }
-.col-maybe .card::before { background: var(--col-maybe-accent); }
-.col-blocked .card::before { background: var(--col-blocked-accent); }
-.col-progress .card::before { background: var(--col-progress-accent); }
-.col-next .card::before { background: var(--col-next-accent); }
-.col-done .card::before { background: var(--col-done-accent); }
-.col-backlog .card::before { background: var(--col-backlog-accent); }
+.col-notnow .card:not(.is-blocked)::before { background: var(--col-notnow-accent); }
+.col-maybe .card:not(.is-blocked)::before { background: var(--col-maybe-accent); }
+.col-progress .card:not(.is-blocked)::before { background: var(--col-progress-accent); }
+.col-next .card:not(.is-blocked)::before { background: var(--col-next-accent); }
+.col-done .card:not(.is-blocked)::before { background: var(--col-done-accent); }
+
+/* Blocked card styling — works in any column */
+.card.is-blocked {
+  border: 1.5px solid var(--blocked-border);
+  background: var(--blocked-bg);
+}
+.card.is-blocked::before { background: var(--blocked-border); width: 4px; }
+.card.is-blocked .card-title { color: var(--blocked-border); }
+
+.blocked-badge {
+  display: inline-block; font-size: 0.6em; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; background: var(--blocked-badge); color: #fff;
+  padding: 2px 7px; border-radius: 4px; margin-bottom: 6px; pointer-events: none;
+}
+.card:not(.is-blocked) .blocked-badge { display: none; }
 
 .tags { margin-top: 8px; pointer-events: none; }
 .tag { display: inline-block; font-size: 0.68em; padding: 3px 9px; border-radius: 10px; font-weight: 600; margin-right: 4px; }
@@ -167,9 +170,6 @@ body {
 [data-theme="dark"] .tag-mayak { background: #064e3b; color: #6ee7b7; }
 [data-theme="dark"] .tag-ori { background: #451a03; color: #fcd34d; }
 [data-theme="dark"] .tag-all { background: #374151; color: #d1d5db; }
-
-.card.constraint-card { border-color: var(--col-blocked-accent); border-width: 1.5px; }
-.card.constraint-card .card-title { color: var(--col-blocked-accent); }
 
 .drop-indicator { height: 3px; background: var(--col-progress-accent); border-radius: 2px; margin: 4px 0; animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
@@ -201,7 +201,7 @@ body {
 
 <div class="stats">
   <div class="stat"><div class="stat-label">Goal</div><div class="stat-value">$200K</div><div class="stat-sub">by May 23, 2026</div></div>
-  <div class="stat"><div class="stat-label">Revenue</div><div class="stat-value" style="color:var(--col-blocked-accent)">$0</div><div class="stat-sub">no billing</div></div>
+  <div class="stat"><div class="stat-label">Revenue</div><div class="stat-value" style="color:var(--blocked-border)">$0</div><div class="stat-sub">no billing</div></div>
   <div class="stat"><div class="stat-label">Days Left</div><div class="stat-value">75</div><div class="stat-sub">10.5 weeks</div></div>
   <div class="stat"><div class="stat-label">Exit</div><div class="stat-value">$100M+</div><div class="stat-sub">Farol Labs</div></div>
 </div>
@@ -224,26 +224,32 @@ body {
     </div>
     <div class="card-list">
       <div class="card card-item" draggable="true" data-owners="leo" data-id="auth">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">P0: Auth on all instances</div>
         <div class="tags"><span class="tag tag-leo">Leonid</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="leo" data-id="bwrap">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">P0: bwrap sandbox</div>
         <div class="tags"><span class="tag tag-leo">Leonid</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="leo,ori" data-id="fs-guard">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">P1: fs-guard hooks</div>
         <div class="tags"><span class="tag tag-leo">Leonid</span> <span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="dlp">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">P1: DLP outbound</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="twitter-strat">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Twitter strategy</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="trademark">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Trademark "ORI"</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
@@ -260,15 +266,18 @@ body {
     </div>
     <div class="card-list">
       <div class="card card-item" draggable="true" data-owners="ori" data-id="pipeline">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Pipeline 20 leads</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="ph-launch">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Product Hunt launch</div>
         <div class="card-desc">Traffic burst + social proof</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="mayak" data-id="demo-video">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Demo video/GIF</div>
         <div class="card-desc">Landing doesn't convert without visuals</div>
         <div class="tags"><span class="tag tag-mayak">Mayak</span></div>
@@ -277,20 +286,46 @@ body {
     <div class="empty-msg">Empty ✨</div>
   </div>
 
-  <!-- BLOCKED -->
-  <div class="column col-blocked" data-col="blocked">
+  <!-- UP NEXT -->
+  <div class="column col-next" data-col="next">
     <div class="column-header">
       <div class="column-dot"></div>
-      <div class="column-name">Blocked</div>
+      <div class="column-name">Up Next</div>
       <div class="column-count">0</div>
     </div>
     <div class="card-list">
-      <div class="card constraint-card card-item" draggable="true" data-owners="leo" data-id="billing">
-        <div class="card-title">⛔ Billing (Stripe)</div>
-        <div class="card-desc">No legal entity → no Stripe → revenue = $0. Workaround: Lemonsqueezy / Paddle</div>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="getori">
+        <div class="blocked-badge">Blocked</div>
+        <div class="card-title">Move to getori.app</div>
+        <div class="card-desc">New domain, landing, redirects</div>
         <div class="tags"><span class="tag tag-leo">Leonid</span></div>
       </div>
-      <div class="card constraint-card card-item" draggable="true" data-owners="ori,mayak" data-id="onboarding">
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="legal">
+        <div class="blocked-badge">Blocked</div>
+        <div class="card-title">Legal entity (Stripe Atlas)</div>
+        <div class="card-desc">~$500, 1-2 days → Stripe + fundraising</div>
+        <div class="tags"><span class="tag tag-leo">Leonid</span></div>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="leo" data-id="pricing-page">
+        <div class="blocked-badge">Blocked</div>
+        <div class="card-title">Pricing page</div>
+        <div class="card-desc">$20/mo Sebastian · $200/mo Ori</div>
+        <div class="tags"><span class="tag tag-leo">Leonid</span></div>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="mayak" data-id="approve-pricing">
+        <div class="blocked-badge">Blocked</div>
+        <div class="card-title">Approve pricing</div>
+        <div class="card-desc">$20/$200 — needs confirmation</div>
+        <div class="tags"><span class="tag tag-mayak">Mayak</span></div>
+      </div>
+      <div class="card card-item" draggable="true" data-owners="ori" data-id="sys-prompt">
+        <div class="blocked-badge">Blocked</div>
+        <div class="card-title">System prompt refinement</div>
+        <div class="card-desc">After first paying client</div>
+        <div class="tags"><span class="tag tag-ori">Ori</span></div>
+      </div>
+      <div class="card card-item is-blocked" draggable="true" data-owners="ori,mayak" data-id="onboarding">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">⚠️ Ori onboarding</div>
         <div class="card-desc">Client can't tell the difference from ChatGPT in first 30 min</div>
         <div class="tags"><span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Mayak</span></div>
@@ -307,56 +342,28 @@ body {
       <div class="column-count">0</div>
     </div>
     <div class="card-list">
+      <div class="card card-item is-blocked" draggable="true" data-owners="leo" data-id="billing">
+        <div class="blocked-badge">Blocked</div>
+        <div class="card-title">⛔ Billing (Stripe)</div>
+        <div class="card-desc">No legal entity → no Stripe → revenue = $0</div>
+        <div class="tags"><span class="tag tag-leo">Leonid</span></div>
+      </div>
       <div class="card card-item" draggable="true" data-owners="leo" data-id="self-service">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Self-service + Billing</div>
         <div class="card-desc">Auto-deploy ✅ · Now: billing + MiniMax</div>
         <div class="tags"><span class="tag tag-leo">Leonid</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="mayak" data-id="sales">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Sales + client onboarding</div>
         <div class="card-desc">Naora · BUNT · SHAMAN · Leads4You · Deepn</div>
         <div class="tags"><span class="tag tag-mayak">Mayak</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="tg-ph">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">TG promotion + PH prep</div>
-        <div class="card-desc">Channel research. Prep mode — don't launch until billing</div>
-        <div class="tags"><span class="tag tag-ori">Ori</span></div>
-      </div>
-    </div>
-    <div class="empty-msg">Empty ✨</div>
-  </div>
-
-  <!-- UP NEXT -->
-  <div class="column col-next" data-col="next">
-    <div class="column-header">
-      <div class="column-dot"></div>
-      <div class="column-name">Up Next</div>
-      <div class="column-count">0</div>
-    </div>
-    <div class="card-list">
-      <div class="card card-item" draggable="true" data-owners="leo" data-id="getori">
-        <div class="card-title">Move to getori.app</div>
-        <div class="card-desc">New domain, landing, redirects</div>
-        <div class="tags"><span class="tag tag-leo">Leonid</span></div>
-      </div>
-      <div class="card card-item" draggable="true" data-owners="leo" data-id="legal">
-        <div class="card-title">Legal entity (Stripe Atlas)</div>
-        <div class="card-desc">~$500, 1-2 days → Stripe + fundraising</div>
-        <div class="tags"><span class="tag tag-leo">Leonid</span></div>
-      </div>
-      <div class="card card-item" draggable="true" data-owners="leo" data-id="pricing-page">
-        <div class="card-title">Pricing page</div>
-        <div class="card-desc">$20/mo Sebastian · $200/mo Ori</div>
-        <div class="tags"><span class="tag tag-leo">Leonid</span></div>
-      </div>
-      <div class="card card-item" draggable="true" data-owners="mayak" data-id="approve-pricing">
-        <div class="card-title">Approve pricing</div>
-        <div class="card-desc">$20/$200 — needs confirmation</div>
-        <div class="tags"><span class="tag tag-mayak">Mayak</span></div>
-      </div>
-      <div class="card card-item" draggable="true" data-owners="ori" data-id="sys-prompt">
-        <div class="card-title">System prompt refinement</div>
-        <div class="card-desc">After first paying client</div>
+        <div class="card-desc">Channel research. Prep — don't launch until billing</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
     </div>
@@ -372,37 +379,45 @@ body {
     </div>
     <div class="card-list">
       <div class="card card-item" draggable="true" data-owners="leo" data-id="deploy-done">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Self-service deploy ✅</div>
         <div class="card-desc">Shipped Mar 5</div>
         <div class="tags"><span class="tag tag-leo">Leonid</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="landings">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Landings</div>
         <div class="card-desc">cofounder.run + getsebastian.app</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori,mayak" data-id="onboard-v2">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Sebastian Onboarding v2</div>
         <div class="card-desc">BOOTSTRAP.md + PCM + TOC</div>
         <div class="tags"><span class="tag tag-ori">Ori</span> <span class="tag tag-mayak">Mayak</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="mayak" data-id="demo-naora">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Naora demo</div>
         <div class="tags"><span class="tag tag-mayak">Mayak</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="all" data-id="soul">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">SOUL.md + Manifesto</div>
         <div class="tags"><span class="tag tag-all">All</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="unit-econ">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Unit Economics</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="twitter-api">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Twitter API</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
       <div class="card card-item" draggable="true" data-owners="ori" data-id="cron-setup">
+        <div class="blocked-badge">Blocked</div>
         <div class="card-title">Cron: Board + AI News</div>
         <div class="tags"><span class="tag tag-ori">Ori</span></div>
       </div>
@@ -413,7 +428,7 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="footer">Farol Labs · Drag cards between columns · Updated Mar 9, 2026</div>
+<div class="footer">Farol Labs · Drag cards · Double-click to toggle blocked · Updated Mar 9, 2026</div>
 
 <script>
 function toggleTheme() {
@@ -424,11 +439,9 @@ function toggleTheme() {
 const savedTheme = localStorage.getItem('farol-theme');
 if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
+/* Filters */
 const buttons = document.querySelectorAll('.filter-btn');
-let currentFilter = 'all';
-
 function applyFilter(filter) {
-  currentFilter = filter;
   buttons.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
   document.querySelectorAll('.card-item').forEach(card => {
     const owners = card.dataset.owners;
@@ -437,8 +450,7 @@ function applyFilter(filter) {
   });
   updateCounts();
   const url = new URL(window.location);
-  if (filter === 'all') url.searchParams.delete('who');
-  else url.searchParams.set('who', filter);
+  if (filter === 'all') url.searchParams.delete('who'); else url.searchParams.set('who', filter);
   history.replaceState(null, '', url);
 }
 buttons.forEach(btn => btn.addEventListener('click', () => applyFilter(btn.dataset.filter)));
@@ -451,6 +463,16 @@ function updateCounts() {
   });
 }
 
+/* Double-click to toggle blocked */
+document.addEventListener('dblclick', e => {
+  const card = e.target.closest('.card-item');
+  if (!card) return;
+  card.classList.toggle('is-blocked');
+  const isBlocked = card.classList.contains('is-blocked');
+  showToast(isBlocked ? '🔴 Marked as blocked' : '✅ Unblocked');
+  saveState();
+});
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -458,8 +480,9 @@ function showToast(msg) {
   t._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-const colLabels = { notnow:'Not Now', maybe:'Maybe', blocked:'Blocked', progress:'In Progress', next:'Up Next', done:'Done' };
+const colLabels = { notnow:'Not Now', maybe:'Maybe', progress:'In Progress', next:'Up Next', done:'Done' };
 
+/* Drag & Drop */
 let draggedCard = null;
 document.addEventListener('dragstart', e => {
   const card = e.target.closest('.card-item'); if (!card) return;
@@ -497,6 +520,7 @@ document.querySelectorAll('.card-list').forEach(list => {
   });
 });
 
+/* Touch drag */
 let touchCard = null, touchClone = null, touchStartX, touchStartY, touchCurrentList = null;
 document.addEventListener('touchstart', e => {
   const card = e.target.closest('.card-item'); if (!card) return;
@@ -529,24 +553,40 @@ document.addEventListener('touchend', () => {
   document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
 });
 
+/* Persistence */
 function saveState() {
-  const state = {};
-  document.querySelectorAll('.column').forEach(col => { state[col.dataset.col] = [...col.querySelectorAll('.card-item')].map(c => c.dataset.id); });
-  localStorage.setItem('farol-kanban-v3', JSON.stringify(state));
+  const state = { columns: {}, blocked: [] };
+  document.querySelectorAll('.column').forEach(col => {
+    state.columns[col.dataset.col] = [...col.querySelectorAll('.card-item')].map(c => c.dataset.id);
+  });
+  document.querySelectorAll('.card-item.is-blocked').forEach(c => state.blocked.push(c.dataset.id));
+  localStorage.setItem('farol-kanban-v4', JSON.stringify(state));
 }
 function loadState() {
-  const raw = localStorage.getItem('farol-kanban-v3'); if (!raw) return;
+  const raw = localStorage.getItem('farol-kanban-v4'); if (!raw) return;
   try {
-    const state = JSON.parse(raw); const all = {};
+    const state = JSON.parse(raw);
+    const all = {};
     document.querySelectorAll('.card-item').forEach(c => { all[c.dataset.id] = c; });
-    for (const [colName, ids] of Object.entries(state)) {
-      const col = document.querySelector(`.column[data-col="${colName}"]`); if (!col) continue;
-      const list = col.querySelector('.card-list');
-      ids.forEach(id => { if (all[id]) list.appendChild(all[id]); });
+
+    // Restore column positions
+    if (state.columns) {
+      for (const [colName, ids] of Object.entries(state.columns)) {
+        const col = document.querySelector(`.column[data-col="${colName}"]`); if (!col) continue;
+        const list = col.querySelector('.card-list');
+        ids.forEach(id => { if (all[id]) list.appendChild(all[id]); });
+      }
+    }
+
+    // Restore blocked state
+    document.querySelectorAll('.card-item').forEach(c => c.classList.remove('is-blocked'));
+    if (state.blocked) {
+      state.blocked.forEach(id => { if (all[id]) all[id].classList.add('is-blocked'); });
     }
   } catch(e) {}
 }
 
+/* Init */
 loadState();
 const params = new URLSearchParams(window.location.search);
 const who = params.get('who');
